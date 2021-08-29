@@ -1,15 +1,8 @@
 package main
 
-import (
-	"fmt"
-	"log"
-	"net/http"
-
-	"github.com/howkyle/stockfolio-server/analysis"
-)
+import "github.com/howkyle/stockfolio-server/server"
 
 func main() {
-	http.HandleFunc("/analyze", analysis.AnalysisHandler())
-	fmt.Printf("listening")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	server := server.Create(":8000")
+	server.Start()
 }
