@@ -2,6 +2,7 @@ package analysis
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/howkyle/stockfolio-server/domain/entity"
 	"github.com/howkyle/stockfolio-server/domain/types"
@@ -33,7 +34,7 @@ func Analyze(c *entity.Company) (*Result, error) {
 		return nil, err
 
 	}
-	currentEquity := equity(c.LongAssets, c.LongLiabilities)
+	currentEquity := equity(c.CurrentAssets, c.CurrentLiabilities)
 	totalEquity := currentEquity + longEquity
 	bookVal, err := bvs(totalEquity, float32(c.Shares))
 	if err != nil {
@@ -46,10 +47,12 @@ func Analyze(c *entity.Company) (*Result, error) {
 
 	}
 	currentRatio, err := finRatio(c.CurrentAssets, c.CurrentLiabilities)
-	if err != nil {
-		return nil, err
 
+	if err != nil {
+		log.Printf("unable to calculate current ratio: %v", err)
+		return nil, err
 	}
+
 	deRatio, err := finRatio(c.CurrentLiabilities+c.LongLiabilities, totalEquity)
 	if err != nil {
 		return nil, err

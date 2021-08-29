@@ -21,7 +21,6 @@ func AnalysisHandler() http.HandlerFunc {
 		}
 
 		var company entity.Company
-		// err := json.Unmarshal(r.Body, &company)
 		err := json.NewDecoder(r.Body).Decode(&company)
 		if err != nil {
 			http.Error(w, "unable to decode request body", http.StatusBadRequest)
