@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/howkyle/stockfolio-server/domain/entity"
+	"github.com/howkyle/stockfolio-server/portfolio"
 )
 
 func AnalysisHandler() http.HandlerFunc {
@@ -20,7 +20,7 @@ func AnalysisHandler() http.HandlerFunc {
 			return
 		}
 
-		var company entity.Company
+		var company portfolio.Company
 		err := json.NewDecoder(r.Body).Decode(&company)
 		if err != nil {
 			http.Error(w, "unable to decode request body", http.StatusBadRequest)

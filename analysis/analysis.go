@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/howkyle/stockfolio-server/domain/entity"
-	"github.com/howkyle/stockfolio-server/domain/types"
+	"github.com/howkyle/stockfolio-server/portfolio"
 )
 
 type Result struct {
@@ -16,13 +15,13 @@ type Result struct {
 	EarningsYield float32
 	Roe           float32
 	ProfitMargin  float32
-	Eps           types.Dollars
-	Bvs           types.Dollars
-	NetIncome     types.Dollars
-	TotalEquity   types.Dollars
+	Eps           portfolio.Dollars
+	Bvs           portfolio.Dollars
+	NetIncome     portfolio.Dollars
+	TotalEquity   portfolio.Dollars
 }
 
-func Analyze(c *entity.Company) (*Result, error) {
+func Analyze(c *portfolio.Company) (*Result, error) {
 	netIncome := netIncome(c.Revenue, c.Expenditure)
 	eps, err := eps(netIncome, float32(c.Shares))
 	if err != nil {
@@ -77,11 +76,11 @@ func Analyze(c *entity.Company) (*Result, error) {
 	return &Result{pe, pb, currentRatio, deRatio, earningsYield, roe, profitMargin, eps, bookVal, netIncome, totalEquity}, nil
 }
 
-func PEMultiplePrice(market *Market, price types.Dollars, pe float32) (types.Dollars, error) {
+func PEMultiplePrice(market *Market, price portfolio.Dollars, pe float32) (portfolio.Dollars, error) {
 	if pe == 0 {
 		return -1, fmt.Errorf("cant divide by 0")
 	}
-	return (types.Dollars(market.peAvg) * price) / types.Dollars(pe), nil
+	return (portfolio.Dollars(market.peAvg) * price) / portfolio.Dollars(pe), nil
 }
 
 func underValued(market *Market, pe float32) bool {
@@ -106,32 +105,32 @@ type Market struct {
 }
 
 //calculates earnings per share
-func eps(netIncome types.Dollars, shares float32) (types.Dollars, error) {
+func eps(netIncome portfolio.Dollars, shares float32) (portfolio.Dollars, error) {
 	if shares == 0 {
 		return -1, fmt.Errorf("cant divide by 0")
 	}
-	return netIncome / types.Dollars(shares), nil
+	return netIncome / portfolio.Dollars(shares), nil
 }
 
 //calculates the book value of each share
-func bvs(equity types.Dollars, shares float32) (types.Dollars, error) {
+func bvs(equity portfolio.Dollars, shares float32) (portfolio.Dollars, error) {
 	if shares == 0 {
 		return -1, fmt.Errorf("cant divide by 0")
 	}
-	return equity / types.Dollars(shares), nil
+	return equity / portfolio.Dollars(shares), nil
 }
 
-func netIncome(revenue, expenditure types.Dollars) types.Dollars {
+func netIncome(revenue, expenditure portfolio.Dollars) portfolio.Dollars {
 	return revenue - expenditure
 }
 
 //calculates the difference between the assets and  liabilties
-func equity(assets, liabilities types.Dollars) types.Dollars {
+func equity(assets, liabilities portfolio.Dollars) portfolio.Dollars {
 	return assets - liabilities
 }
 
 //calculates a financial ratio
-func finRatio(a, b types.Dollars) (float32, error) {
+func finRatio(a, b portfolio.Dollars) (float32, error) {
 	if b == 0 {
 		return -1, fmt.Errorf("can't divide by 0")
 	}
