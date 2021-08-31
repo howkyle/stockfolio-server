@@ -10,10 +10,6 @@ import (
 
 func AnalysisHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
-			http.Error(w, "method not allowed", http.StatusForbidden)
-			return
-		}
 
 		if r.Body == nil {
 			http.Error(w, "empty request body", http.StatusBadRequest)
@@ -21,6 +17,7 @@ func AnalysisHandler() http.HandlerFunc {
 		}
 
 		var company portfolio.Company
+
 		err := json.NewDecoder(r.Body).Decode(&company)
 		if err != nil {
 			http.Error(w, "unable to decode request body", http.StatusBadRequest)
@@ -28,6 +25,11 @@ func AnalysisHandler() http.HandlerFunc {
 		}
 
 		result, err := Analyze(&company)
+		if err != nil {
+			http.Error(w, "unable to run analysis", http.StatusInternalServerError)
+			return
+		}
+
 		response, _ := json.Marshal(result)
 		w.Header().Add("content-type", "application/json")
 		fmt.Fprintf(w, string(response))
