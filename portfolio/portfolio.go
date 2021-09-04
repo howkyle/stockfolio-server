@@ -1,13 +1,23 @@
 package portfolio
 
+import "gorm.io/gorm"
+
 type Dollars float32
 
+type Portfolio struct {
+	UserID uint
+	gorm.Model
+	Companies []Company
+}
+
 type Company struct {
-	Name   string
-	Symbol string
-	Market int32
-	Shares int
-	Price  Dollars
+	gorm.Model
+	PortfolioID uint
+	Name        string
+	Symbol      string
+	Market      int32
+	Shares      int
+	Price       Dollars
 	Earnings
 	FinacialPosition
 }
