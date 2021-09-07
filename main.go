@@ -26,7 +26,10 @@ func initDB(connection string) *gorm.DB {
 	}
 	log.Printf("connected to db: %v", db.Name())
 
-	db.AutoMigrate(user.User{}, portfolio.Portfolio{}, portfolio.Company{})
+	err = db.AutoMigrate(user.User{}, portfolio.Portfolio{}, portfolio.Company{})
+	if err != nil {
+		panic("unable to run db migration: " + err.Error())
+	}
 
 	return db
 }
