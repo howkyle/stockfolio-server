@@ -7,30 +7,25 @@ import (
 
 type User struct {
 	gorm.Model
+	Email     string
 	Username  string
 	Password  string
-	Portfolio []portfolio.Portfolio
+	Portfolio portfolio.Portfolio
+}
+
+type UserSignup struct {
+	UserName string
+	Email    string
+	Password string
 }
 
 type Repo interface {
-	Create(user *User)
+	Create(user User)
 	Retrieve(id string)
 	Delete(id string)
 }
 
 type Service interface {
-	Signup()
-	Login() (*User, error)
-}
-
-type service struct {
-	repository Repo
-}
-
-func Signup(u *User) {
-
-}
-
-func Login(id string) (*User, error) {
-	return nil, nil
+	Signup(u UserSignup)
+	// Login(username, password string) (*User, error)
 }
