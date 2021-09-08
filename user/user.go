@@ -21,11 +21,11 @@ type UserSignup struct {
 
 type Repo interface {
 	Create(user User)
-	Retrieve(id string)
+	Retrieve(username string) (*User, error)
 	Delete(id string)
 }
 
 type Service interface {
 	Signup(u UserSignup)
-	// Login(username, password string) (*User, error)
+	Login(username, password string) error
 }
