@@ -1,5 +1,7 @@
 package user
 
+import "fmt"
+
 type service struct {
 	repository Repo
 }
@@ -16,6 +18,11 @@ func (s service) Signup(us UserSignup) {
 	s.repository.Create(u)
 }
 
-func Login(id string) (*User, error) {
-	return nil, nil
+func (s service) Login(username, password string) error {
+	u, err := s.repository.Retrieve(username)
+	if err != nil {
+		return err
+	}
+	fmt.Println(u)
+	return nil
 }
