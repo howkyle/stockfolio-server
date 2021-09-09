@@ -1,28 +1,42 @@
 package user
 
-import "fmt"
+import (
+	"github.com/howkyle/stockfolio-server/auth"
+)
 
 type service struct {
-	repository Repo
+	repository  Repo
+	authManager auth.AuthManager
 }
 
-func CreateService(r Repo) service {
-	s := service{repository: r}
+//creates a new instance of the user service
+func CreateService(r Repo, auth auth.AuthManager) service {
+	s := service{repository: r, authManager: auth}
 
 	return s
 }
 
 func (s service) Signup(us UserSignup) {
-	u := User{Email: us.Email, Username: us.UserName, Password: us.Password}
+	hashPass := hashPass(us.Password)
+	u := User{Email: us.Email, Username: us.UserName, Password: hashPass}
 
 	s.repository.Create(u)
 }
 
-func (s service) Login(username, password string) error {
+//uses authenticator to authenitcate user on login
+func (s service) Login(username, password string) (string, error) {
 	u, err := s.repository.Retrieve(username)
 	if err != nil {
-		return err
+		return "", err
 	}
-	fmt.Println(u)
-	return nil
+	expected := s.authManager.NewCredentials(u.Username, u.Password)
+	actual := s.authManager.NewCredentials(username, password)
+
+	auth, err := s.authManager.Authenticate(actual, expected)
+	return auth.Get(), nil
+}
+
+func hashPass(p string) string {
+	h := p
+	return h
 }
