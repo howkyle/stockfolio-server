@@ -7,8 +7,9 @@ import (
 )
 
 type Configuration struct {
-	DB   string `yaml:"db"`
-	Port string `yaml:"port"`
+	DB     string `yaml:"db"`
+	Port   string `yaml:"port"`
+	Secret string `yaml:"secret"`
 }
 
 //reads config from yaml file

@@ -15,7 +15,7 @@ import (
 func main() {
 	config := config.Config()
 	db := initDB(config.DB)
-	server := server.Create(config.Port, db)
+	server := server.Create(config.Port, db, config.Secret)
 	server.Start()
 }
 
