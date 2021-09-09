@@ -7,6 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/howkyle/stockfolio-server/analysis"
+	"github.com/howkyle/stockfolio-server/auth"
+	"github.com/howkyle/stockfolio-server/auth/jwt_auth"
 	"github.com/howkyle/stockfolio-server/user"
 	"gorm.io/gorm"
 )
@@ -16,10 +18,11 @@ type server struct {
 	router      *mux.Router
 	db          *gorm.DB
 	userService user.Service
+	authManager auth.AuthManager
 }
 
 //creates server instance
-func Create(port string, db *gorm.DB) server {
+func Create(port string, db *gorm.DB, secret string) server {
 
 	s := server{port: port, db: db}
 	s.configServices()
@@ -38,7 +41,8 @@ func (s *server) configRouter() {
 
 func (s *server) configServices() {
 	ur := user.NewRepository(s.db)
-	s.userService = user.CreateService(ur)
+	s.authManager = jwt_auth.NewJWTAuth()
+	s.userService = user.CreateService(ur, s.authManager)
 }
 
 //starts the server
