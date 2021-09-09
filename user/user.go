@@ -27,5 +27,5 @@ type Repo interface {
 
 type Service interface {
 	Signup(u UserSignup)
-	Login(username, password string) error
+	Login(username, password string) (string, error)
 }
