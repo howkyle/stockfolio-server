@@ -27,9 +27,11 @@ func (r repository) Create(user User) {
 }
 
 func (r repository) Retrieve(username string) (*User, error) {
+	log.Printf("retrieving user '%s'", username)
 	user := User{}
 	res := r.db.Where(&User{Username: username}).First(&user)
 	if res.Error != nil {
+		log.Printf("unable to retrieve user '%s': %v", username, res.Error)
 		return nil, fmt.Errorf("unable to retrieve user:%v", res.Error)
 	}
 
