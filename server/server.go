@@ -17,6 +17,7 @@ type server struct {
 	port        string
 	router      *mux.Router
 	db          *gorm.DB
+	secret      string
 	userService user.Service
 	authManager auth.AuthManager
 }
@@ -24,7 +25,7 @@ type server struct {
 //creates server instance
 func Create(port string, db *gorm.DB, secret string) server {
 
-	s := server{port: port, db: db}
+	s := server{port: port, db: db, secret: secret}
 	s.configServices()
 	s.configRouter()
 	return s
@@ -41,7 +42,7 @@ func (s *server) configRouter() {
 
 func (s *server) configServices() {
 	ur := user.NewRepository(s.db)
-	s.authManager = jwt_auth.NewJWTAuth()
+	s.authManager = jwt_auth.NewJWTAuth(s.secret)
 	s.userService = user.CreateService(ur, s.authManager)
 }
 
