@@ -15,4 +15,6 @@ type Auth interface {
 
 //interface to represent credentials
 type Credentials interface {
+	//retrieves the principal associated with the credentials eg. username, id etc
+	Principal() string
 }
