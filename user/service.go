@@ -1,6 +1,10 @@
+//implements user service
 package user
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/howkyle/stockfolio-server/auth"
 )
 
@@ -33,6 +37,10 @@ func (s service) Login(username, password string) (string, error) {
 	actual := s.authManager.NewCredentials(username, password)
 
 	auth, err := s.authManager.Authenticate(actual, expected)
+	if err != nil {
+		log.Printf("login failed: %v", err)
+		return "", fmt.Errorf("login failed: %v", err)
+	}
 	return auth.Get(), nil
 }
 
