@@ -27,12 +27,16 @@ func LoginHandler(s Service) http.HandlerFunc {
 		if err != nil {
 			log.Printf("unable to decode request body:%v", err)
 			http.Error(w, "bad request", http.StatusBadRequest)
+			return
 		}
-		err = s.Login(login.UserName, login.Password)
+		token, err := s.Login(login.UserName, login.Password)
 		if err != nil {
 			log.Printf("unable to login:%v", err)
 			http.Error(w, "failed login", http.StatusUnauthorized)
+			return
 
 		}
+		cookie := http.Cookie{Name: "pyt", Value: token, Domain: "localhost"}
+		http.SetCookie(w, &cookie)
 	}
 }
