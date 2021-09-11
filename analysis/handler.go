@@ -3,9 +3,8 @@ package analysis
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-
-	"github.com/howkyle/stockfolio-server/portfolio"
 )
 
 func AnalysisHandler() http.HandlerFunc {
@@ -16,10 +15,11 @@ func AnalysisHandler() http.HandlerFunc {
 			return
 		}
 
-		var company portfolio.Company
+		var company Company
 
 		err := json.NewDecoder(r.Body).Decode(&company)
 		if err != nil {
+			log.Printf("unable to decode request body: %v", err)
 			http.Error(w, "unable to decode request body", http.StatusBadRequest)
 			return
 		}

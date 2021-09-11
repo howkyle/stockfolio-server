@@ -30,6 +30,6 @@ type FinacialPosition struct {
 }
 
 type Earnings struct {
-	Revenue     Dollars
+	Income      Dollars
 	Expenditure Dollars
 }

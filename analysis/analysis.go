@@ -7,6 +7,27 @@ import (
 	"github.com/howkyle/stockfolio-server/portfolio"
 )
 
+type Company struct {
+	Name   string
+	Symbol string
+	Market int32
+	Shares int
+	Price  portfolio.Dollars
+	Earnings
+	FinacialPosition
+}
+
+type FinacialPosition struct {
+	CurrentAssets      []portfolio.Dollars
+	CurrentLiabilities []portfolio.Dollars
+	LongAssets         []portfolio.Dollars
+	LongLiabilities    []portfolio.Dollars
+}
+
+type Earnings struct {
+	Income      []portfolio.Dollars
+	Expenditure []portfolio.Dollars
+}
 type Result struct {
 	Pe            float32
 	Pb            float32
@@ -21,8 +42,8 @@ type Result struct {
 	TotalEquity   portfolio.Dollars
 }
 
-func Analyze(c *portfolio.Company) (*Result, error) {
-	netIncome := netIncome(c.Revenue, c.Expenditure)
+func Analyze(c *Company) (*Result, error) {
+	netIncome := netIncome(c.Income, c.Expenditure)
 	eps, err := eps(netIncome, float32(c.Shares))
 	if err != nil {
 		return nil, err
@@ -45,14 +66,14 @@ func Analyze(c *portfolio.Company) (*Result, error) {
 		return nil, err
 
 	}
-	currentRatio, err := finRatio(c.CurrentAssets, c.CurrentLiabilities)
+	currentRatio, err := finRatio(sumSlice(c.CurrentAssets), sumSlice(c.CurrentLiabilities))
 
 	if err != nil {
 		log.Printf("unable to calculate current ratio: %v", err)
 		return nil, err
 	}
 
-	deRatio, err := finRatio(c.CurrentLiabilities+c.LongLiabilities, totalEquity)
+	deRatio, err := finRatio(sumSlice(c.CurrentLiabilities)+sumSlice(c.LongLiabilities), totalEquity)
 	if err != nil {
 		return nil, err
 
@@ -67,7 +88,7 @@ func Analyze(c *portfolio.Company) (*Result, error) {
 		return nil, err
 
 	}
-	profitMargin, err := finRatio(netIncome, c.Revenue)
+	profitMargin, err := finRatio(netIncome, sumSlice(c.Income))
 	if err != nil {
 		return nil, err
 
@@ -120,13 +141,25 @@ func bvs(equity portfolio.Dollars, shares float32) (portfolio.Dollars, error) {
 	return equity / portfolio.Dollars(shares), nil
 }
 
-func netIncome(revenue, expenditure portfolio.Dollars) portfolio.Dollars {
-	return revenue - expenditure
+func netIncome(revenue, expenditure []portfolio.Dollars) portfolio.Dollars {
+	return sumSlice(revenue) - sumSlice(expenditure)
 }
 
 //calculates the difference between the assets and  liabilties
-func equity(assets, liabilities portfolio.Dollars) portfolio.Dollars {
-	return assets - liabilities
+func equity(assets, liabilities []portfolio.Dollars) portfolio.Dollars {
+	sum_assets := sumSlice(assets)
+	sum_liabilities := sumSlice(liabilities)
+
+	return sum_assets - sum_liabilities
+}
+
+//takes a slice of dollars and returns the sum
+func sumSlice(s []portfolio.Dollars) portfolio.Dollars {
+	var sum portfolio.Dollars = 0
+	for _, v := range s {
+		sum += v
+	}
+	return sum
 }
 
 //calculates a financial ratio
