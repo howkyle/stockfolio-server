@@ -20,11 +20,17 @@ func CreateService(r Repo, auth auth.AuthManager) service {
 	return s
 }
 
-func (s service) Signup(us UserSignup) {
-	hashPass := hashPass(us.Password)
-	u := User{Email: us.Email, Username: us.UserName, Password: hashPass}
+func (s service) Signup(us UserSignup) error {
+	cred := s.authManager.NewCredentials(us.UserName, us.Password)
+	hash, err := cred.Hash()
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf("unable to signup user: %v", err)
+	}
+	u := User{Email: us.Email, Username: cred.Principal(), Password: hash}
 
 	s.repository.Create(u)
+	return nil
 }
 
 //uses authenticator to authenitcate user on login
@@ -33,18 +39,13 @@ func (s service) Login(username, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	expected := s.authManager.NewCredentials(u.Username, u.Password)
-	actual := s.authManager.NewCredentials(username, password)
 
-	auth, err := s.authManager.Authenticate(actual, expected)
+	credentials := s.authManager.NewCredentials(u.Username, u.Password)
+
+	auth, err := s.authManager.Authenticate(credentials, password)
 	if err != nil {
 		log.Printf("login failed: %v", err)
 		return "", fmt.Errorf("login failed: %v", err)
 	}
 	return auth.Get(), nil
-}
-
-func hashPass(p string) string {
-	h := p
-	return h
 }
