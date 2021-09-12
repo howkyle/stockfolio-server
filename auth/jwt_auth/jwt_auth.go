@@ -8,14 +8,27 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/howkyle/stockfolio-server/auth"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userPassCredentials struct {
-	Username, Password string
+	username, password string
 }
 
 func (u userPassCredentials) Principal() string {
-	return u.Username
+	return u.username
+}
+
+func (u userPassCredentials) Hash() (string, error) {
+	hash, err := hashPass(u.password)
+	if err != nil {
+		return "", fmt.Errorf("unable to hash password: %v", err)
+	}
+	return string(hash), nil
+}
+
+func (u userPassCredentials) Password() string {
+	return u.password
 }
 
 type jwtAuth struct {
@@ -30,13 +43,14 @@ func (j jwtAuth) Get() string {
 	return j.access_token
 }
 
-func (a jwtAuthMan) Authenticate(actual, expected auth.Credentials) (auth.Auth, error) {
-	if !compare(actual, expected) {
+func (a jwtAuthMan) Authenticate(u auth.Credentials, password string) (auth.Auth, error) {
+	err := compare([]byte(u.Password()), []byte(password))
+	if err != nil {
 		log.Println("invalid credentials")
-		return jwtAuth{}, fmt.Errorf("credentials not equal")
+		return jwtAuth{}, fmt.Errorf("credentials not equal: %v", err)
 	}
-	log.Printf("authenticated '%s'", expected.Principal())
-	token, err := createToken(expected.Principal(), a.secret)
+	log.Printf("authenticated '%s'", u.Principal())
+	token, err := createToken(u.Principal(), a.secret)
 	if err != nil {
 		log.Printf("token creation failed: %v", err)
 		return nil, fmt.Errorf("token creation failed: %v", err)
@@ -44,8 +58,10 @@ func (a jwtAuthMan) Authenticate(actual, expected auth.Credentials) (auth.Auth, 
 	return jwtAuth{token}, nil
 }
 
+//takes username and password and returns credential struct
 func (a jwtAuthMan) NewCredentials(username, password string) auth.Credentials {
-	u := userPassCredentials{Username: username, Password: password}
+
+	u := userPassCredentials{username: username, password: password}
 	return u
 }
 
@@ -58,9 +74,14 @@ func NewJWTAuth(secret string) jwtAuthMan {
 	return jwtAuthMan{secret: secret}
 }
 
-//compares credential structs
-func compare(a auth.Credentials, b auth.Credentials) bool {
-	return a == b
+//compares passwords
+func compare(a, b []byte) error {
+	log.Printf("comparing %v and %v", a, b)
+	err := bcrypt.CompareHashAndPassword(a, b)
+	if err != nil {
+		return fmt.Errorf("password comparision failed: %v", err)
+	}
+	return nil
 }
 
 //creates jwt using subject and secret, returns signed string
@@ -78,4 +99,14 @@ func createToken(subject string, secret string) (string, error) {
 		return "", fmt.Errorf("unable to sign token: %v", err)
 	}
 	return ts, nil
+}
+
+//hashes password using bcrypt
+func hashPass(password string) ([]byte, error) {
+	hp, err := bcrypt.GenerateFromPassword([]byte(password), 15)
+	if err != nil {
+		log.Printf("hash failed: %v", err)
+		return nil, fmt.Errorf("unable to hash password: %v", err)
+	}
+	return hp, nil
 }
