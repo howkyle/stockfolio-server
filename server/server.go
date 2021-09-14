@@ -36,7 +36,7 @@ func (s *server) configRouter() {
 	r := mux.NewRouter()
 	r.HandleFunc("/login", user.LoginHandler(s.userService)).Methods("POST")
 	r.HandleFunc("/signup", user.SignUpHandler(s.userService)).Methods("POST")
-	r.HandleFunc("/analyze", analysis.AnalysisHandler()).Methods("POST")
+	r.HandleFunc("/analyze", s.authManager.Filter(analysis.AnalysisHandler())).Methods("POST")
 	s.router = r
 }
 
