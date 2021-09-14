@@ -2,8 +2,10 @@
 package jwt_auth
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -46,13 +48,13 @@ func (j jwtAuth) Get() string {
 func (a jwtAuthMan) Authenticate(u auth.Credentials, password string) (auth.Auth, error) {
 	err := compare([]byte(u.Password()), []byte(password))
 	if err != nil {
-		log.Println("invalid credentials")
+		log.Printf("auth error: %v", err)
 		return jwtAuth{}, fmt.Errorf("credentials not equal: %v", err)
 	}
 	log.Printf("authenticated '%s'", u.Principal())
 	token, err := createToken(u.Principal(), a.secret)
 	if err != nil {
-		log.Printf("token creation failed: %v", err)
+		log.Printf("token error: %v", err)
 		return nil, fmt.Errorf("token creation failed: %v", err)
 	}
 	return jwtAuth{token}, nil
@@ -65,8 +67,24 @@ func (a jwtAuthMan) NewCredentials(username, password string) auth.Credentials {
 	return u
 }
 
-func (a jwtAuthMan) CheckAuth() error {
-	return nil
+func (a jwtAuthMan) Filter(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//check auth in requests
+		cookie, err := r.Cookie("pyt")
+		if err != nil {
+			http.Error(w, "missing auth", http.StatusUnauthorized)
+			return
+		}
+		sub, err := verifyToken(cookie.Value, a.secret)
+		if err != nil {
+			http.Error(w, "access not allowed", http.StatusUnauthorized)
+			return
+		}
+		ctx := context.WithValue(r.Context(), "sub", sub)
+
+		h.ServeHTTP(w, r.WithContext(ctx))
+
+	}
 }
 
 //creates a new instance of the jwt auth manager
@@ -74,9 +92,10 @@ func NewJWTAuth(secret string) jwtAuthMan {
 	return jwtAuthMan{secret: secret}
 }
 
+//helpers
+
 //compares passwords
 func compare(a, b []byte) error {
-	log.Printf("comparing %v and %v", a, b)
 	err := bcrypt.CompareHashAndPassword(a, b)
 	if err != nil {
 		return fmt.Errorf("password comparision failed: %v", err)
@@ -99,6 +118,24 @@ func createToken(subject string, secret string) (string, error) {
 		return "", fmt.Errorf("unable to sign token: %v", err)
 	}
 	return ts, nil
+}
+
+//takes a token string and the server secret and parses and validates token and returns
+//the subject i.e username
+func verifyToken(t string, secret string) (string, error) {
+	//todo add more validations and checks
+	log.Printf("validating token: %v", t)
+	token, err := jwt.ParseWithClaims(t, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil {
+		log.Printf("parsing error: %v", err)
+		return "", fmt.Errorf("unable to parse token: %v", err)
+	}
+	c := token.Claims.(*jwt.StandardClaims)
+	fmt.Println(c)
+	fmt.Println(c.Subject)
+	return c.Subject, nil
 }
 
 //hashes password using bcrypt
