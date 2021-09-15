@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -14,11 +15,12 @@ import (
 )
 
 type userPassCredentials struct {
-	username, password string
+	principal interface{}
+	password  string
 }
 
-func (u userPassCredentials) Principal() string {
-	return u.username
+func (u userPassCredentials) Principal() interface{} {
+	return u.principal
 }
 
 func (u userPassCredentials) Hash() (string, error) {
@@ -52,7 +54,7 @@ func (a jwtAuthMan) Authenticate(u auth.Credentials, password string) (auth.Auth
 		return jwtAuth{}, fmt.Errorf("credentials not equal: %v", err)
 	}
 	log.Printf("authenticated '%s'", u.Principal())
-	token, err := createToken(u.Principal(), a.secret)
+	token, err := createToken(fmt.Sprint(u.Principal()), a.secret)
 	if err != nil {
 		log.Printf("token error: %v", err)
 		return nil, fmt.Errorf("token creation failed: %v", err)
@@ -60,10 +62,9 @@ func (a jwtAuthMan) Authenticate(u auth.Credentials, password string) (auth.Auth
 	return jwtAuth{token}, nil
 }
 
-//takes username and password and returns credential struct
-func (a jwtAuthMan) NewCredentials(username, password string) auth.Credentials {
-
-	u := userPassCredentials{username: username, password: password}
+//takes principal and password and returns credential struct
+func (a jwtAuthMan) NewCredentials(principal interface{}, password string) auth.Credentials {
+	u := userPassCredentials{principal: principal, password: password}
 	return u
 }
 
@@ -122,7 +123,7 @@ func createToken(subject string, secret string) (string, error) {
 
 //takes a token string and the server secret and parses and validates token and returns
 //the subject i.e username
-func verifyToken(t string, secret string) (string, error) {
+func verifyToken(t string, secret string) (uint, error) {
 	//todo add more validations and checks
 	log.Printf("validating token: %v", t)
 	token, err := jwt.ParseWithClaims(t, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
@@ -130,12 +131,15 @@ func verifyToken(t string, secret string) (string, error) {
 	})
 	if err != nil {
 		log.Printf("parsing error: %v", err)
-		return "", fmt.Errorf("unable to parse token: %v", err)
+		return 0, fmt.Errorf("unable to parse token: %v", err)
 	}
 	c := token.Claims.(*jwt.StandardClaims)
-	fmt.Println(c)
-	fmt.Println(c.Subject)
-	return c.Subject, nil
+	uid, err := strconv.ParseUint(c.Subject, 10, 64)
+	if err != nil {
+		log.Println(err)
+		return 0, fmt.Errorf("unable to parse sub: %v", err)
+	}
+	return uint(uid), nil
 }
 
 //hashes password using bcrypt

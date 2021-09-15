@@ -5,7 +5,7 @@ import "net/http"
 
 type AuthManager interface {
 	//accepts username and password and transforms to custom user details type
-	NewCredentials(username, password string) Credentials
+	NewCredentials(sub interface{}, password string) Credentials
 	//accepts user details and given password, compares equality and returns auth type
 	Authenticate(u Credentials, password string) (Auth, error)
 	// //serves as a filter to verify authentication
@@ -24,7 +24,7 @@ type Credentials interface {
 
 type UserDetails interface {
 	//retrieves the principal associated with the credentials eg. username, id etc
-	Principal() string
+	Principal() interface{}
 }
 
 type Password interface {
