@@ -13,7 +13,7 @@ func (s service) Portfolio(userid uint) (Portfolio, error) {
 	p, err := s.repo.Get(userid)
 	if err != nil {
 		log.Println(err)
-		return Portfolio{}, fmt.Errorf("unable to retrieve users portfolio: %v", err)
+		return Portfolio{}, fmt.Errorf("unable to retrieve portfolio: %w", err)
 	}
 	return p, nil
 }
