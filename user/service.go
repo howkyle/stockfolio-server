@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/howkyle/stockfolio-server/auth"
+	"github.com/howkyle/stockfolio-server/portfolio"
 )
 
 type service struct {
@@ -27,8 +28,7 @@ func (s service) Signup(us UserSignup) error {
 		log.Println(err)
 		return fmt.Errorf("unable to signup user: %v", err)
 	}
-	u := User{Email: us.Email, Username: cred.Principal(), Password: hash}
-
+	u := User{Email: us.Email, Username: us.UserName, Password: hash, Portfolio: portfolio.Portfolio{Title: fmt.Sprintf("%v's Portfolio", us.UserName)}}
 	s.repository.Create(u)
 	return nil
 }
@@ -39,9 +39,7 @@ func (s service) Login(username, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	credentials := s.authManager.NewCredentials(u.Username, u.Password)
-
+	credentials := s.authManager.NewCredentials(u.ID, u.Password)
 	auth, err := s.authManager.Authenticate(credentials, password)
 	if err != nil {
 		log.Printf("login failed: %v", err)

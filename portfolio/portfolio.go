@@ -7,6 +7,7 @@ import (
 type Dollars float32
 
 type Portfolio struct {
+	Title  string
 	UserID uint
 	gorm.Model
 	Companies []Company
