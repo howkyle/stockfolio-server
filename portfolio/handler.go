@@ -2,9 +2,12 @@ package portfolio
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/howkyle/stockfolio-server/cust_error"
 )
 
 func GetPortfolioHandler(s Service) http.HandlerFunc {
@@ -19,7 +22,11 @@ func GetPortfolioHandler(s Service) http.HandlerFunc {
 		}
 		p, err := s.Portfolio(uid)
 		if err != nil {
-			http.Error(w, "somthing went wrong", http.StatusInternalServerError)
+			if errors.Is(err, cust_error.NotFound) {
+				http.Error(w, err.Error(), http.StatusNotFound)
+				return
+			}
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		body, err := json.Marshal(p)
