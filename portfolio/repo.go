@@ -1,9 +1,11 @@
 package portfolio
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
+	"github.com/howkyle/stockfolio-server/cust_error"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +18,11 @@ func (r repository) Get(userid uint) (Portfolio, error) {
 	res := r.db.Where(&Portfolio{UserID: userid}).First(&p)
 	if res.Error != nil {
 		log.Println(res.Error)
-		return Portfolio{}, fmt.Errorf("unable to retrieve portfolio: %v", res.Error)
+
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return Portfolio{}, cust_error.NotFound
+		}
+		return Portfolio{}, res.Error
 	}
 	return p, nil
 }
