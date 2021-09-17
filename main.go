@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/howkyle/stockfolio-server/company"
 	"github.com/howkyle/stockfolio-server/config"
 	"github.com/howkyle/stockfolio-server/portfolio"
 	"github.com/howkyle/stockfolio-server/server"
@@ -26,7 +27,7 @@ func initDB(connection string) *gorm.DB {
 	}
 	log.Printf("connected to db: %v", db.Name())
 
-	err = db.AutoMigrate(user.User{}, portfolio.Portfolio{}, portfolio.Company{})
+	err = db.AutoMigrate(user.User{}, portfolio.Portfolio{}, company.Company{}, company.FinancialReport{})
 	if err != nil {
 		panic("unable to run db migration: " + err.Error())
 	}
