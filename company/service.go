@@ -27,6 +27,15 @@ func (s service) Company(cid uint) (Company, error) {
 	return c, nil
 }
 
+func (s service) CompaniesByPortfolio(pid uint) ([]Company, error) {
+	c, err := s.repo.Companies(pid)
+	if err != nil {
+		log.Printf("company service failed: %v", err)
+		return nil, err
+	}
+	return c, nil
+}
+
 func (s service) AddReport(r FinancialReport) (uint, error) {
 
 	rid, err := s.repo.AddReport(r)
