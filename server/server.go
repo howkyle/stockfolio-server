@@ -40,9 +40,10 @@ func (s *server) configRouter() {
 	r := mux.NewRouter()
 	r.HandleFunc("/login", user.LoginHandler(s.userService)).Methods("POST")
 	r.HandleFunc("/signup", user.SignUpHandler(s.userService)).Methods("POST")
-	// r.HandleFunc("/report", s.authManager.Filter(portfolio.NewCompanyHandler(s.portfolioService))).Methods("GET")
 	r.HandleFunc("/report", s.authManager.Filter(company.AddReportHandler(s.companyService))).Methods("POST")
+	r.HandleFunc("/report/{rid}", s.authManager.Filter(company.GetReportHandler(s.companyService))).Methods("GET")
 	r.HandleFunc("/portfolio", s.authManager.Filter(portfolio.GetPortfolioHandler(s.portfolioService))).Methods("GET")
+	r.HandleFunc("/portfolio/{pid}/assets", s.authManager.Filter(company.CompaniesByPortfolioHandler(s.companyService))).Methods("GET")
 	r.HandleFunc("/company/add", s.authManager.Filter(company.NewCompanyHandler(s.companyService))).Methods("POST")
 	r.HandleFunc("/analyze", s.authManager.Filter(analysis.AnalysisHandler())).Methods("POST")
 	s.router = r
