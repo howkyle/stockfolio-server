@@ -55,6 +55,15 @@ func (s service) GetReport(rid uint) (FinancialReport, error) {
 	return fr, nil
 }
 
+func (s service) GetReportsByCompany(cid uint) ([]FinancialReport, error) {
+	fr, err := s.repo.GetReports(cid)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return fr, nil
+}
+
 func CreateService(r Repo) service {
 	return service{repo: r}
 }

@@ -43,7 +43,7 @@ func (r repository) Company(cid uint) (Company, error) {
 //retrieves a slice of companies from the db using the portfolio id
 func (r repository) Companies(pid uint) ([]Company, error) {
 	var c []Company
-	res := r.db.Where(Company{PortfolioID: pid}).First(&c)
+	res := r.db.Where(Company{PortfolioID: pid}).Find(&c)
 	if res.Error != nil {
 		log.Println(res.Error)
 		return nil, fmt.Errorf("unable to retrieve companies: %w", res.Error)
@@ -70,6 +70,17 @@ func (r repository) GetReport(rid uint) (FinancialReport, error) {
 	if res.Error != nil {
 		log.Println((res.Error))
 		return FinancialReport{}, res.Error
+	}
+	return fr, nil
+}
+
+//retrieves a slice financial report from the db using the company id
+func (r repository) GetReports(cid uint) ([]FinancialReport, error) {
+	var fr []FinancialReport
+	res := r.db.Where(FinancialReport{CompanyID: cid}).Find(&fr)
+	if res.Error != nil {
+		log.Println((res.Error))
+		return nil, res.Error
 	}
 	return fr, nil
 }
