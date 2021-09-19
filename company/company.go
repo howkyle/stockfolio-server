@@ -63,8 +63,10 @@ type Repo interface {
 	Companies(pid uint) ([]Company, error)
 	//inserts a new report associated with a company
 	AddReport(fr FinancialReport) (uint, error)
-	//retrieves report associated with a company
+	//retrieves report using the report id
 	GetReport(rid uint) (FinancialReport, error)
+	//retrieves slice of reports using company id
+	GetReports(cid uint) ([]FinancialReport, error)
 }
 
 type Service interface {
@@ -78,6 +80,8 @@ type Service interface {
 	AddReport(r FinancialReport) (uint, error)
 	//retrieves a financial report associated with a company in the portfolio
 	GetReport(rid uint) (FinancialReport, error)
+	//retrieves a slice of financial reports belonging to a company
+	GetReportsByCompany(cid uint) ([]FinancialReport, error)
 }
 
 //UseCase
