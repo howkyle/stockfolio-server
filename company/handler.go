@@ -122,3 +122,35 @@ func GetReportHandler(s Service) http.HandlerFunc {
 		fmt.Fprint(w, string(response))
 	}
 }
+
+func GetReportsByCompanyHandler(s Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		cid := params["cid"]
+		if cid == "" {
+			http.Error(w, "invalid param: company id", http.StatusBadRequest)
+			return
+		}
+		id, err := strconv.ParseUint(cid, 10, 64)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "invalid param: company id", http.StatusBadRequest)
+			return
+		}
+		result, err := s.GetReportsByCompany(uint(id))
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
+		response, err := json.Marshal(result)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, "", http.StatusInternalServerError)
+		}
+
+		w.Header().Add("content-type", "application/json")
+
+		fmt.Fprint(w, string(response))
+	}
+}
