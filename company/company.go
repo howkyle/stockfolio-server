@@ -59,6 +59,8 @@ type Repo interface {
 	DeleteCompany(cid uint) error
 	//retrieves a company from the db by id
 	Company(cid uint) (Company, error)
+	//retrieves a slice of companies from the db
+	Companies(pid uint) ([]Company, error)
 	//inserts a new report associated with a company
 	AddReport(fr FinancialReport) (uint, error)
 	//retrieves report associated with a company
@@ -70,6 +72,8 @@ type Service interface {
 	AddCompany(c Company) (uint, error)
 	//retrieves a company in the users porfolio
 	Company(cid uint) (Company, error)
+	//retrieves a slice of companies belonging to a portfolio
+	CompaniesByPortfolio(pid uint) ([]Company, error)
 	//adds a financial report for a company in the portfolio
 	AddReport(r FinancialReport) (uint, error)
 	//retrieves a financial report associated with a company in the portfolio
