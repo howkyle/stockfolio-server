@@ -44,7 +44,8 @@ func (s *server) configRouter() {
 	r.HandleFunc("/report/{rid}", s.authManager.Filter(company.GetReportHandler(s.companyService))).Methods("GET")
 	r.HandleFunc("/portfolio", s.authManager.Filter(portfolio.GetPortfolioHandler(s.portfolioService))).Methods("GET")
 	r.HandleFunc("/portfolio/{pid}/assets", s.authManager.Filter(company.CompaniesByPortfolioHandler(s.companyService))).Methods("GET")
-	r.HandleFunc("/company/add", s.authManager.Filter(company.NewCompanyHandler(s.companyService))).Methods("POST")
+	r.HandleFunc("/company", s.authManager.Filter(company.NewCompanyHandler(s.companyService))).Methods("POST")
+	r.HandleFunc("/company/{cid}/reports", s.authManager.Filter(company.GetReportsByCompanyHandler(s.companyService))).Methods("GET")
 	r.HandleFunc("/analyze", s.authManager.Filter(analysis.AnalysisHandler())).Methods("POST")
 	s.router = r
 }
