@@ -13,7 +13,7 @@ type Configuration struct {
 }
 
 //reads config from yaml file
-func Config() *Configuration {
+func Config() Configuration {
 
 	file, err := os.ReadFile("./config.yml")
 	if err != nil {
@@ -25,5 +25,5 @@ func Config() *Configuration {
 		panic("unable to unmarshall config:" + err.Error())
 	}
 
-	return &c
+	return c
 }
