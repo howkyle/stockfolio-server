@@ -23,6 +23,7 @@ type server struct {
 	userService      user.Service
 	portfolioService portfolio.Service
 	companyService   company.Service
+	analysisService  analysis.Service
 	authManager      auth.AuthManager
 }
 
@@ -46,7 +47,9 @@ func (s *server) configRouter() {
 	r.HandleFunc("/portfolio/{pid}/assets", s.authManager.Filter(company.CompaniesByPortfolioHandler(s.companyService))).Methods("GET")
 	r.HandleFunc("/company", s.authManager.Filter(company.NewCompanyHandler(s.companyService))).Methods("POST")
 	r.HandleFunc("/company/{cid}/reports", s.authManager.Filter(company.GetReportsByCompanyHandler(s.companyService))).Methods("GET")
-	r.HandleFunc("/analyze", s.authManager.Filter(analysis.AnalysisHandler())).Methods("POST")
+	r.HandleFunc("/analysis/quick", s.authManager.Filter(analysis.QuickAnalysisHandler(s.analysisService))).Methods("POST")
+	r.HandleFunc("/analysis/report", s.authManager.Filter(analysis.ReportAnalysisHandler(s.analysisService))).Methods("POST")
+
 	s.router = r
 }
 
@@ -58,6 +61,7 @@ func (s *server) configServices() {
 	s.userService = user.CreateService(ur, s.authManager)
 	s.companyService = company.CreateService(cr)
 	s.portfolioService = portfolio.CreateService(pr)
+	s.analysisService = analysis.CreateService()
 }
 
 //starts the server
