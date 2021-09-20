@@ -24,13 +24,13 @@ type Company struct {
 	Name             string
 	Symbol           string
 	Market           int32
-	Shares           int
 	FinancialReports []FinancialReport
 }
 
 type FinancialReport struct {
 	gorm.Model
 	CompanyID uint
+	Shares    int
 	Year      time.Time
 	Quarter   int
 	Price     Dollars
@@ -90,17 +90,17 @@ type AddCompany struct {
 	PortfolioID uint
 	Name        string
 	Symbol      string
-	Shares      int
 }
 
 func (a AddCompany) Company() Company {
 	return Company{PortfolioID: a.PortfolioID,
-		Name: a.Name, Symbol: a.Symbol, Shares: a.Shares}
+		Name: a.Name, Symbol: a.Symbol}
 }
 
 type AddReport struct {
 	gorm.Model
 	CompanyID          uint
+	Shares             int
 	Year               time.Time
 	Quarter            int
 	Price              Dollars
@@ -115,6 +115,7 @@ type AddReport struct {
 func (a AddReport) Report() FinancialReport {
 	r := FinancialReport{
 		CompanyID: a.CompanyID,
+		Shares:    a.Shares,
 		Year:      a.Year,
 		Quarter:   a.Quarter,
 		Price:     a.Price,
