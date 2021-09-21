@@ -34,6 +34,35 @@ func (q QuickAnalysis) ToFinancialReport() company.FinancialReport {
 	}
 }
 
+type ReportAnalysis struct {
+	Shares             int
+	Price              company.Dollars
+	CurrentAssets      company.Dollars
+	CurrentLiabilities company.Dollars
+	LongAssets         company.Dollars
+	LongLiabilities    company.Dollars
+	Income             company.Dollars
+	Expenditure        company.Dollars
+}
+
+func (r ReportAnalysis) ToFinancialReport() company.FinancialReport {
+	return company.FinancialReport{
+		Shares: r.Shares,
+		Price:  r.Price,
+		Earnings: company.Earnings{
+			Income:      r.Income,
+			Expenditure: r.Expenditure,
+		},
+		FinacialPosition: company.FinacialPosition{
+			CurrentAssets:      r.CurrentAssets,
+			CurrentLiabilities: r.CurrentLiabilities,
+			LongAssets:         r.LongAssets,
+			LongLiabilities:    r.LongLiabilities,
+		},
+	}
+}
+
+//represents the result of an analysis
 type Result struct {
 	Pe            float32
 	Pb            float32
@@ -49,5 +78,7 @@ type Result struct {
 }
 
 type Service interface {
+	//takes a financial report as input and runs analysis to return
+	//result or error
 	Analyze(c company.FinancialReport) (*Result, error)
 }
