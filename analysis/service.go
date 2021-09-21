@@ -7,11 +7,11 @@ import (
 	"github.com/howkyle/stockfolio-server/company"
 )
 
+//implements analysis service
 type service struct {
 }
 
 func (s service) Analyze(c company.FinancialReport) (*Result, error) {
-	// c := a.ToFinancialReport()
 	netIncome := netIncome(c.Income, c.Expenditure)
 	eps, err := eps(netIncome, float32(c.Shares))
 	if err != nil {
