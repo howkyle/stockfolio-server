@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 func SignUpHandler(s Service) http.HandlerFunc {
@@ -38,5 +39,11 @@ func LoginHandler(s Service) http.HandlerFunc {
 		}
 		cookie := http.Cookie{Name: "pyt", Value: token, Domain: "localhost"}
 		http.SetCookie(w, &cookie)
+	}
+}
+
+func LogOutHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{Name: "pyt", Expires: time.Now()})
 	}
 }
