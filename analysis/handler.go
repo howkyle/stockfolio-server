@@ -17,7 +17,7 @@ func QuickAnalysisHandler(s Service) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		result, err := s.Analyze(company.ToFinancialReport())
+		result, err := s.Analyze(company)
 		if err != nil {
 			http.Error(w, "unable to run analysis", http.StatusInternalServerError)
 			return
@@ -44,7 +44,7 @@ func ReportAnalysisHandler(s Service) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		result, err := s.Analyze(company.ToFinancialReport())
+		result, err := s.Analyze(company)
 		if err != nil {
 			http.Error(w, "unable to run analysis", http.StatusInternalServerError)
 			return

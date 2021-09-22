@@ -11,7 +11,9 @@ import (
 type service struct {
 }
 
-func (s service) Analyze(c company.FinancialReport) (*Result, error) {
+func (s service) Analyze(a Analyzer) (*Result, error) {
+
+	c := a.ToReport()
 	netIncome := netIncome(c.Income, c.Expenditure)
 	eps, err := eps(netIncome, float32(c.Shares))
 	if err != nil {

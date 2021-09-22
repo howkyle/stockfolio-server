@@ -4,6 +4,10 @@ import (
 	"github.com/howkyle/stockfolio-server/company"
 )
 
+type Analyzer interface {
+	ToReport() company.FinancialReport
+}
+
 type QuickAnalysis struct {
 	Name               string
 	Symbol             string
@@ -17,7 +21,7 @@ type QuickAnalysis struct {
 	Expenditure        company.DollarSlice
 }
 
-func (q QuickAnalysis) ToFinancialReport() company.FinancialReport {
+func (q QuickAnalysis) ToReport() company.FinancialReport {
 	return company.FinancialReport{
 		Shares: q.Shares,
 		Price:  q.Price,
@@ -45,7 +49,7 @@ type ReportAnalysis struct {
 	Expenditure        company.Dollars
 }
 
-func (r ReportAnalysis) ToFinancialReport() company.FinancialReport {
+func (r ReportAnalysis) ToReport() company.FinancialReport {
 	return company.FinancialReport{
 		Shares: r.Shares,
 		Price:  r.Price,
@@ -80,5 +84,5 @@ type Result struct {
 type Service interface {
 	//takes a financial report as input and runs analysis to return
 	//result or error
-	Analyze(c company.FinancialReport) (*Result, error)
+	Analyze(a Analyzer) (*Result, error)
 }
