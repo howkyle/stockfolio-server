@@ -105,7 +105,7 @@ func GetReportHandler(s Service) http.HandlerFunc {
 			http.Error(w, "invalid param: report id", http.StatusBadRequest)
 			return
 		}
-		result, err := s.GetReport(uint(id))
+		result, err := s.Report(uint(id))
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "", http.StatusInternalServerError)
@@ -137,7 +137,7 @@ func GetReportsByCompanyHandler(s Service) http.HandlerFunc {
 			http.Error(w, "invalid param: company id", http.StatusBadRequest)
 			return
 		}
-		result, err := s.GetReportsByCompany(uint(id))
+		result, err := s.ReportsByCompany(uint(id))
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "", http.StatusInternalServerError)

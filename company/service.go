@@ -3,7 +3,50 @@ package company
 import (
 	"fmt"
 	"log"
+	"time"
 )
+
+type AddCompany struct {
+	PortfolioID uint
+	Name        string
+	Symbol      string
+}
+
+func (a AddCompany) Company() Company {
+	return Company{PortfolioID: a.PortfolioID,
+		Name: a.Name, Symbol: a.Symbol}
+}
+
+type AddReport struct {
+	CompanyID          uint
+	Shares             int
+	Year               time.Time
+	Quarter            int
+	Price              Dollars
+	CurrentAssets      DollarSlice
+	CurrentLiabilities DollarSlice
+	LongAssets         DollarSlice
+	LongLiabilities    DollarSlice
+	Income             DollarSlice
+	Expenditure        DollarSlice
+}
+
+func (a AddReport) Report() FinancialReport {
+	return FinancialReport{
+		CompanyID: a.CompanyID,
+		Shares:    a.Shares,
+		Year:      a.Year,
+		Quarter:   a.Quarter,
+		Price:     a.Price,
+		Earnings:  Earnings{Income: a.Income.Total(), Expenditure: a.Expenditure.Total()},
+		FinacialPosition: FinacialPosition{
+			CurrentAssets:      a.CurrentAssets.Total(),
+			CurrentLiabilities: a.CurrentLiabilities.Total(),
+			LongAssets:         a.LongAssets.Total(),
+			LongLiabilities:    a.LongLiabilities.Total(),
+		},
+	}
+}
 
 type service struct {
 	repo Repo
@@ -46,8 +89,8 @@ func (s service) AddReport(r FinancialReport) (uint, error) {
 	return rid, nil
 }
 
-func (s service) GetReport(rid uint) (FinancialReport, error) {
-	fr, err := s.repo.GetReport(rid)
+func (s service) Report(rid uint) (FinancialReport, error) {
+	fr, err := s.repo.Report(rid)
 	if err != nil {
 		log.Println(err)
 		return FinancialReport{}, err
@@ -55,8 +98,8 @@ func (s service) GetReport(rid uint) (FinancialReport, error) {
 	return fr, nil
 }
 
-func (s service) GetReportsByCompany(cid uint) ([]FinancialReport, error) {
-	fr, err := s.repo.GetReports(cid)
+func (s service) ReportsByCompany(cid uint) ([]FinancialReport, error) {
+	fr, err := s.repo.ReportsByCompany(cid)
 	if err != nil {
 		log.Println(err)
 		return nil, err

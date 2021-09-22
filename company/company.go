@@ -1,13 +1,18 @@
 package company
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 type Dollars float32
+
+func (d Dollars) String() string {
+	return fmt.Sprintf("$%g", d)
+}
+
 type DollarSlice []Dollars
 
 func (d DollarSlice) Total() Dollars {
@@ -64,9 +69,9 @@ type Repo interface {
 	//inserts a new report associated with a company
 	AddReport(fr FinancialReport) (uint, error)
 	//retrieves report using the report id
-	GetReport(rid uint) (FinancialReport, error)
+	Report(rid uint) (FinancialReport, error)
 	//retrieves slice of reports using company id
-	GetReports(cid uint) ([]FinancialReport, error)
+	ReportsByCompany(cid uint) ([]FinancialReport, error)
 }
 
 type Service interface {
@@ -79,54 +84,7 @@ type Service interface {
 	//adds a financial report for a company in the portfolio
 	AddReport(r FinancialReport) (uint, error)
 	//retrieves a financial report associated with a company in the portfolio
-	GetReport(rid uint) (FinancialReport, error)
+	Report(rid uint) (FinancialReport, error)
 	//retrieves a slice of financial reports belonging to a company
-	GetReportsByCompany(cid uint) ([]FinancialReport, error)
-}
-
-//UseCase
-
-type AddCompany struct {
-	PortfolioID uint
-	Name        string
-	Symbol      string
-}
-
-func (a AddCompany) Company() Company {
-	return Company{PortfolioID: a.PortfolioID,
-		Name: a.Name, Symbol: a.Symbol}
-}
-
-type AddReport struct {
-	gorm.Model
-	CompanyID          uint
-	Shares             int
-	Year               time.Time
-	Quarter            int
-	Price              Dollars
-	CurrentAssets      DollarSlice
-	CurrentLiabilities DollarSlice
-	LongAssets         DollarSlice
-	LongLiabilities    DollarSlice
-	Income             DollarSlice
-	Expenditure        DollarSlice
-}
-
-func (a AddReport) Report() FinancialReport {
-	r := FinancialReport{
-		CompanyID: a.CompanyID,
-		Shares:    a.Shares,
-		Year:      a.Year,
-		Quarter:   a.Quarter,
-		Price:     a.Price,
-		Earnings:  Earnings{Income: a.Income.Total(), Expenditure: a.Expenditure.Total()},
-		FinacialPosition: FinacialPosition{
-			CurrentAssets:      a.CurrentAssets.Total(),
-			CurrentLiabilities: a.CurrentLiabilities.Total(),
-			LongAssets:         a.LongAssets.Total(),
-			LongLiabilities:    a.LongLiabilities.Total(),
-		},
-	}
-	log.Println(r)
-	return r
+	ReportsByCompany(cid uint) ([]FinancialReport, error)
 }

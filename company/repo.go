@@ -64,7 +64,7 @@ func (r repository) AddReport(fr FinancialReport) (uint, error) {
 }
 
 //retrieves a financial report from the db using the report id
-func (r repository) GetReport(rid uint) (FinancialReport, error) {
+func (r repository) Report(rid uint) (FinancialReport, error) {
 	var fr FinancialReport
 	res := r.db.First(&fr, rid)
 	if res.Error != nil {
@@ -75,7 +75,7 @@ func (r repository) GetReport(rid uint) (FinancialReport, error) {
 }
 
 //retrieves a slice financial report from the db using the company id
-func (r repository) GetReports(cid uint) ([]FinancialReport, error) {
+func (r repository) ReportsByCompany(cid uint) ([]FinancialReport, error) {
 	var fr []FinancialReport
 	res := r.db.Where(FinancialReport{CompanyID: cid}).Find(&fr)
 	if res.Error != nil {
