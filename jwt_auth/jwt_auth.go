@@ -53,7 +53,6 @@ func (a jwtAuthMan) Authenticate(u auth.Credentials, password string) (auth.Auth
 		log.Printf("auth error: %v", err)
 		return jwtAuth{}, fmt.Errorf("credentials not equal: %v", err)
 	}
-	log.Printf("authenticated '%s'", u.Principal())
 	token, err := createToken(fmt.Sprint(u.Principal()), a.secret)
 	if err != nil {
 		log.Printf("token error: %v", err)
@@ -125,7 +124,6 @@ func createToken(subject string, secret string) (string, error) {
 //the subject i.e username
 func verifyToken(t string, secret string) (uint, error) {
 	//todo add more validations and checks
-	log.Printf("validating token: %v", t)
 	token, err := jwt.ParseWithClaims(t, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
