@@ -40,7 +40,7 @@ func Create(port string, db *gorm.DB, secret string) server {
 func (s *server) configRouter() {
 	r := mux.NewRouter()
 	r.HandleFunc("/login", user.LoginHandler(s.userManager, s.authManager)).Methods("POST")
-	// r.HandleFunc("/logout", user.LogOutHandler()).Methods("GET")
+	r.HandleFunc("/logout", user.LogOutHandler()).Methods("GET")
 	r.HandleFunc("/signup", user.SignUpHandler(s.userManager, s.authManager)).Methods("POST")
 	r.HandleFunc("/report", s.authManager.Filter(company.AddReportHandler(s.companyService))).Methods("POST")
 	r.HandleFunc("/report/{rid}", s.authManager.Filter(company.GetReportHandler(s.companyService))).Methods("GET")
