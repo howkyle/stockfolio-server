@@ -1,43 +1,56 @@
 package user
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
+	"github.com/howkyle/uman"
 	"gorm.io/gorm"
 )
 
-func NewRepository(database *gorm.DB) Repo {
-	return &repository{database}
+var InvalidUser = errors.New("invalid user struct")
+var CreationFailure = errors.New("unable to add user to repository")
+var NotFound = errors.New("user not found")
+
+func NewRepository(database *gorm.DB) uman.UserRepository {
+	return repository{database}
 }
 
 type repository struct {
 	db *gorm.DB
 }
 
-func (r repository) Create(user User) {
-	res := r.db.Create(&user)
+func (r repository) Create(user uman.User) (interface{}, error) {
+
+	u, ok := user.(User)
+	if !ok {
+		return nil, InvalidUser
+	}
+
+	res := r.db.Create(&u)
 	if res.Error != nil {
 		log.Printf("unable to add user:%v", res.Error)
-		return
+		return nil, CreationFailure
 	}
-
-	log.Printf("user added")
-
+	return u.GetID(), nil
 }
 
-func (r repository) Retrieve(username string) (*User, error) {
-	log.Printf("retrieving user '%s'", username)
+//takes a struct with the criterial to to search
+func (r repository) Retrieve(u interface{}) (uman.User, error) {
 	user := User{}
-	res := r.db.Where(&User{Username: username}).First(&user)
+	res := r.db.Where(u).First(&user)
 	if res.Error != nil {
-		log.Printf("unable to retrieve user '%s': %v", username, res.Error)
-		return nil, fmt.Errorf("unable to retrieve user:%v", res.Error)
-	}
+		log.Println(res.Error)
 
-	return &user, nil
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return nil, NotFound
+		}
+		return nil, fmt.Errorf("unable to retrieve user:%w", res.Error)
+	}
+	return user, nil
 }
 
-func (r repository) Delete(id string) {
-
+func (r repository) Delete(id interface{}) error {
+	return nil
 }
