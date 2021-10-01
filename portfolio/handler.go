@@ -5,22 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-
-	"github.com/howkyle/stockfolio-server/cust_error"
+	"strconv"
 )
 
 func GetPortfolioHandler(s Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userid := r.Context().Value("sub")
+		userid := fmt.Sprintf("%v", r.Context().Value("sub"))
 
-		uid, ok := userid.(uint)
-		if !ok {
+		uid, err := strconv.ParseUint(userid, 10, 64)
+		if err != nil {
 			http.Error(w, "something went wrong", http.StatusInternalServerError)
 			return
 		}
-		p, err := s.Portfolio(uid)
+		p, err := s.Portfolio(uint(uid))
 		if err != nil {
-			if errors.Is(err, cust_error.NotFound) {
+			if errors.Is(err, NotFound) {
 				http.Error(w, err.Error(), http.StatusNotFound)
 				return
 			}
