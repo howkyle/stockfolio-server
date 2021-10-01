@@ -4,9 +4,10 @@ import (
 	"errors"
 	"log"
 
-	"github.com/howkyle/stockfolio-server/cust_error"
 	"gorm.io/gorm"
 )
+
+var NotFound = errors.New("portfolio not found")
 
 type repository struct {
 	db *gorm.DB
@@ -19,7 +20,7 @@ func (r repository) Get(userid uint) (Portfolio, error) {
 		log.Println(res.Error)
 
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return Portfolio{}, cust_error.NotFound
+			return Portfolio{}, NotFound
 		}
 		return Portfolio{}, res.Error
 	}
@@ -27,5 +28,5 @@ func (r repository) Get(userid uint) (Portfolio, error) {
 }
 
 func NewRepository(database *gorm.DB) Repo {
-	return &repository{database}
+	return repository{database}
 }
