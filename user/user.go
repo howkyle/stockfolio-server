@@ -2,7 +2,6 @@ package user
 
 import (
 	"github.com/howkyle/stockfolio-server/portfolio"
-	"github.com/howkyle/uman"
 	"gorm.io/gorm"
 )
 
@@ -14,28 +13,18 @@ type User struct {
 	Portfolio portfolio.Portfolio
 }
 
-func (u User) GetID() interface{} {
-	return u.ID
-}
-func (u User) GetUsername() string {
-	return u.Username
-}
-func (u User) GetEmail() string {
-	return u.Email
-}
-
-func (u User) GetPassword() string {
-	return u.Password
-}
-
 type UserSignup struct {
 	UserName string
 	Email    string
 	Password string
 }
 
+type Service interface {
+	Register(u User) (interface{}, error)
+	Signin(u User) (interface{}, error)
+}
 type Repo interface {
-	Create(user uman.User) (interface{}, error)
-	Retrieve(u interface{}) (uman.User, error)
+	Create(user User) (interface{}, error)
+	Retrieve(u interface{}) (User, error)
 	Delete(id interface{}) error
 }
