@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/howkyle/authman"
 	"github.com/howkyle/stockfolio-server/analysis"
 	"github.com/howkyle/uman"
 
@@ -22,9 +24,10 @@ type server struct {
 	secret           string
 	userManager      uman.UserManager
 	portfolioService portfolio.Service
+	userService      user.Service
 	companyService   company.Service
 	analysisService  analysis.Service
-	authManager      uman.AuthManager
+	authManager      authman.AuthManager
 }
 
 //creates server instance
@@ -39,9 +42,9 @@ func Create(port string, db *gorm.DB, secret string) server {
 // configures routes and returns router
 func (s *server) configRouter() {
 	r := mux.NewRouter()
-	r.HandleFunc("/login", user.LoginHandler(s.userManager, s.authManager)).Methods("POST")
+	r.HandleFunc("/login", user.LoginHandler(s.userService)).Methods("POST")
 	r.HandleFunc("/logout", user.LogOutHandler()).Methods("GET")
-	r.HandleFunc("/signup", user.SignUpHandler(s.userManager, s.authManager)).Methods("POST")
+	r.HandleFunc("/signup", user.SignUpHandler(s.userService)).Methods("POST")
 	r.HandleFunc("/report", s.authManager.Filter(company.AddReportHandler(s.companyService))).Methods("POST")
 	r.HandleFunc("/report/{rid}", s.authManager.Filter(company.GetReportHandler(s.companyService))).Methods("GET")
 	r.HandleFunc("/portfolio", s.authManager.Filter(portfolio.GetPortfolioHandler(s.portfolioService))).Methods("GET")
@@ -58,8 +61,8 @@ func (s *server) configServices() {
 	ur := user.NewRepository(s.db)
 	pr := portfolio.NewRepository(s.db)
 	cr := company.NewRepository(s.db)
-	s.authManager = uman.NewJWTAuthManager(s.secret, "pyt", "localhost")
-	s.userManager = uman.NewUserManager(ur)
+	s.authManager = authman.NewJWTAuthManager(s.secret, "access_token", "localhost", time.Minute*15)
+	s.userService = user.NewService(ur, s.authManager)
 	s.companyService = company.CreateService(cr)
 	s.portfolioService = portfolio.CreateService(pr)
 	s.analysisService = analysis.CreateService()
