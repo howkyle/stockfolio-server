@@ -29,33 +29,19 @@ func LoginHandler(s Service) http.HandlerFunc {
 		var login UserRegistration
 		err := json.NewDecoder(r.Body).Decode(&login)
 		if err != nil {
-			log.Printf("unable to decode request body:%v", err)
+			log.Println(err)
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
 		auth, err := s.Signin(login.User())
 		if err != nil {
-
+			http.Error(w, "failed authentication", http.StatusUnauthorized)
+			return
 		}
-		// user, err := u.Retrieve(User{Username: login.UserName})
-		// if err != nil {
-		// 	log.Println(err)
-		// 	http.Error(w, "failed login", http.StatusUnauthorized)
-		// 	return
-		// }
-
-		// cred := uman.NewUserPassCredentials(fmt.Sprintf("%v", user.GetID()), user.GetPassword())
-		// auth, err := a.Authenticate(cred, login.Password)
-		// if err != nil {
-		// 	log.Println(err)
-		// 	http.Error(w, "failed login", http.StatusUnauthorized)
-		// 	return
-		// }
-
-		// cookie := http.Cookie{Name: "pyt", Value: auth.Auth(), Domain: "localhost"}
 		cookie, ok := auth.(http.Cookie)
 		if !ok {
-
+			http.Error(w, "failed to set auth", http.StatusInternalServerError)
+			return
 		}
 		http.SetCookie(w, &cookie)
 	}
