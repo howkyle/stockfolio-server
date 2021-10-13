@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/howkyle/authman"
 	"github.com/howkyle/stockfolio-server/analysis"
-	"github.com/howkyle/uman"
 
 	"github.com/howkyle/stockfolio-server/company"
 	"github.com/howkyle/stockfolio-server/portfolio"
@@ -22,7 +21,6 @@ type server struct {
 	router           *mux.Router
 	db               *gorm.DB
 	secret           string
-	userManager      uman.UserManager
 	portfolioService portfolio.Service
 	userService      user.Service
 	companyService   company.Service
