@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/howkyle/authman"
 	"github.com/howkyle/stockfolio-server/portfolio"
@@ -18,34 +17,26 @@ type service struct {
 func (s service) Register(u User) (interface{}, error) {
 	hashedPass, err := authman.NewUserPassCredentials(u.Username, u.Password).Hash()
 	if err != nil {
-		// http.Error(w, "unable to hash credentials", http.StatusInternalServerError)
-		// return
+		return nil, fmt.Errorf("failed to hash password: %v", err)
 	}
-
-	// ut := User{Username: body.UserName, Password: hashedPass, Portfolio: portfolio.Portfolio{Title: fmt.Sprintf("%v's Portfolio", body.UserName)}}
 	u.Password = hashedPass
 	id, err := s.repo.Create(u)
 	if err != nil {
-		// log.Println(err)
-		// http.Error(w, "unable to create user", http.StatusInternalServerError)
+		return nil, fmt.Errorf("failed to create user: %v", err)
 	}
 	return id, nil
 }
 
 func (s service) Signin(u User) (interface{}, error) {
-	user, err := s.repo.Retrieve(u)
+	user, err := s.repo.Retrieve(User{Username: u.Username})
 	if err != nil {
-		// log.Println(err)
-		// http.Error(w, "failed login", http.StatusUnauthorized)
-		// return
+		return nil, fmt.Errorf("failed to retrieve user: %v", err)
 	}
 
 	cred := authman.NewUserPassCredentials(fmt.Sprintf("%v", user.ID), user.Password)
 	auth, err := s.authman.Authenticate(cred, u.Password)
 	if err != nil {
-		log.Println(err)
-		// http.Error(w, "failed login", http.StatusUnauthorized)
-		// return
+		return nil, fmt.Errorf("failed authentication: %v", err)
 	}
 
 	return auth.AsCookie(), nil
